@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Spinner from '../Loader/Loader';
 import ImageGallery from '../ImageGallery/ImageGallery';
 import Button from '../Button/Button';
@@ -14,12 +14,9 @@ function FetchAPI({ searchValue }) {
     const [loading, setLoading] = useState(false);
     const [empty, setEmpty] = useState(false);
     const [error, setError] = useState(null);
-    // const[status, setStatus] = useState('start');
-
-
 
     useEffect(() => {
-        if (!searchValue) {
+        if (!searchValue || pageNum !== 1) {
             return;
         }
         
@@ -30,7 +27,7 @@ function FetchAPI({ searchValue }) {
             .then(imgsArr => {
                 if (imgsArr.length <= 0) {
                     setImages(null);
-                    empty(true);
+                    setEmpty(true);
                     return;
 
                 } else {
@@ -39,26 +36,24 @@ function FetchAPI({ searchValue }) {
             })
             .catch(error => setError(error))
             .finally(setLoading(false));
-}, [searchValue]);
+}, [pageNum, searchValue]);
 
     useEffect(() => {
         if (pageNum === 1) {
             return;
         }
 
-        // console.log("pageNum: " + pageNum, "ebala: " + prevPage)
-
         setLoading(true);
-        setEmpty(false);
+       setEmpty(false);
 
         api.fetchAPI(searchValue, pageNum, KEY)
             .then(imgsArr => {
                 if (imgsArr.length <= 0) {
                     setImages([]);
-                    empty(true);
+                   setEmpty(true);
                     return;
                 } else {
-                    setImages([...images, ...imgsArr]);
+                    setImages(prevState => [...prevState, ...imgsArr]);
                     return;
                 }
             })
@@ -71,12 +66,12 @@ function FetchAPI({ searchValue }) {
                     behavior: 'smooth',
                 });
             })
-        return;
-    }, [pageNum]);
+
+    }, [pageNum, searchValue]);
 
         
     const onLoadMoreButtonClick = () => {
-        return setPageNum(pageNum + 1);
+        setPageNum(prevState => prevState + 1);
     }
 
         return (
